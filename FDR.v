@@ -159,4 +159,23 @@ end
     
 endmodule
 
-
+module my_SRL16E #(
+  parameter [15:0] INIT = 16'h0000,
+)(
+  output Q,
+  input A0,
+  input A1,
+  input A2,
+  input A3,
+  input CE,
+  input CLK,
+  input D
+);
+  reg  [15:0] data = INIT;
+  always @(posedge CLK) begin
+    if (CE == 1'b1) begin
+      data[15:0] <= {data[14:0], D};
+    end
+  end
+  assign Q = data[{A3, A2, A1, A0}];
+endmodule
