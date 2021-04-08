@@ -160,7 +160,7 @@ end
 endmodule
 
 module my_SRL16E #(
-  parameter [15:0] INIT = 16'h0000,
+  parameter [15:0] INIT = 16'h0000
 )(
   output Q,
   input A0,
