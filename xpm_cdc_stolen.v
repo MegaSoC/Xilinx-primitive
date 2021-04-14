@@ -115,12 +115,12 @@ module stolen_cdc_single #(
 
   // Virtual mux:  Register at input optional.
   generate
-  if (SRC_INPUT_REG) begin : extra_inreg
+  if (SRC_INPUT_REG) begin
     assign src_inqual = src_ff;
-  end : extra_inreg
-  else begin : no_extra_inreg
+  end
+  else begin
     assign src_inqual = src_in;
-  end : no_extra_inreg
+  end 
   endgenerate
 
   `XPM_XSRREG(src_clk , 1'b0,  src_ff,        src_in,         1'b0)
@@ -180,12 +180,12 @@ module stolen_cdc_array_single # (
 
   // Virtual mux:  Register at input optional.
   generate
-  if (SRC_INPUT_REG) begin : extra_inreg
+  if (SRC_INPUT_REG) begin 
     assign src_inqual = src_ff;
-  end : extra_inreg
-  else begin : no_extra_inreg
+  end 
+  else begin 
     assign src_inqual = src_in;
-  end : no_extra_inreg
+  end 
   endgenerate
 
   genvar vara_i;

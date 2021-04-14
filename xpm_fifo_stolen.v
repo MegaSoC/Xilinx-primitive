@@ -1257,9 +1257,10 @@ module stolen_reg_pipe_bit # (
 );
   wire pipe_stage_ff [PIPE_STAGES:0];
 
+  genvar pipestage;
   assign pipe_stage_ff[0] = pipe_in;
 
-    for (genvar pipestage = 0; pipestage < PIPE_STAGES ;pipestage = pipestage + 1) begin
+    for (pipestage = 0; pipestage < PIPE_STAGES ;pipestage = pipestage + 1) begin
       stolen_fifo_reg_bit #(RST_VALUE)
         pipe_bit_inst (rst, clk, pipe_stage_ff[pipestage], pipe_stage_ff[pipestage+1]);
     end
