@@ -276,87 +276,22 @@ module stolen_fifo_base # (
   localparam USE_DRAM_CONSTRAINT = (COMMON_CLOCK == 0 && FIFO_MEMORY_TYPE == 1) ? 1 : 0;
   localparam WR_MODE_B           = (FIFO_MEMORY_TYPE == 1 || FIFO_MEMORY_TYPE == 3) ? 1 : 2;
   
-  
-  if (C_SELECT_XPM) begin
-      xpm_memory_base # (
-    
-        // Common module parameters
-        .MEMORY_TYPE              (1                    ),
-        .MEMORY_SIZE              (FIFO_SIZE            ),
-        .MEMORY_PRIMITIVE         (FIFO_MEMORY_TYPE     ),
-        .CLOCKING_MODE            (COMMON_CLOCK ? 0 : 1 ),
-        .ECC_MODE                 (0),
-        .USE_MEM_INIT             (0                    ),
-        .MEMORY_INIT_FILE         ("none"               ),
-        .MEMORY_INIT_PARAM        (""                   ),
-        .WAKEUP_TIME              (0          ),
-        .MESSAGE_CONTROL          (0                    ),
-        .VERSION                  (0                    ),
-        .MEMORY_OPTIMIZATION      ("true"               ),
-        .AUTO_SLEEP_TIME          (0                    ),
-        .USE_EMBEDDED_CONSTRAINT  (USE_DRAM_CONSTRAINT  ),
-        .CASCADE_HEIGHT           (CASCADE_HEIGHT       ),
-    
-        // Port A module parameters
-        .WRITE_DATA_WIDTH_A       (WRITE_DATA_WIDTH     ),
-        .READ_DATA_WIDTH_A        (WRITE_DATA_WIDTH     ),
-        .BYTE_WRITE_WIDTH_A       (WRITE_DATA_WIDTH     ),
-        .ADDR_WIDTH_A             (WR_PNTR_WIDTH        ),
-        .READ_RESET_VALUE_A       ("0"                  ),
-        .READ_LATENCY_A           (2                    ),
-        .WRITE_MODE_A             (2                    ),
-    
-        // Port B module parameters
-        .WRITE_DATA_WIDTH_B       (READ_DATA_WIDTH      ),
-        .READ_DATA_WIDTH_B        (READ_DATA_WIDTH      ),
-        .BYTE_WRITE_WIDTH_B       (READ_DATA_WIDTH      ),
-        .ADDR_WIDTH_B             (RD_PNTR_WIDTH        ),
-        .READ_RESET_VALUE_B       (""     ),
-        .READ_LATENCY_B           (1           ),
-        .WRITE_MODE_B             (WR_MODE_B            )
-      ) stolen_memory_base_inst (
-        .sleep(0),
-        // Port A module ports
-        .clka           (wr_clk                   ),
-        .rsta           (1'b0                     ),
-        .ena            (ram_wr_en_i              ),
-        .regcea         (1'b0                     ),
-        .wea            (ram_wr_en_i              ),
-        .addra          (wr_pntr                  ),
-        .dina           (din                      ),
-        .injectsbiterra (0            ),
-        .injectdbiterra (0            ),
-        .douta          (                         ),
-    
-        // Port B module ports
-        .clkb           (rd_clk                   ),
-        .rstb           (rst_int                  ),
-        .enb            (ram_rd_en_i              ),
-        .regceb         (READ_MODE == 0 ? ram_regce_pipe: ram_regce),
-        .web            (1'b0                     ),
-        .addrb          (rd_pntr                  ),
-        .dinb           ({READ_DATA_WIDTH{1'b0}}  ),
-        .injectsbiterrb (1'b0                     ),
-        .injectdbiterrb (1'b0                     ),
-        .doutb          (dout_i                   )
-      );
-  end else begin
-      S018DP_RAM_DP_W32_B6_M4 fifo_mem (
-        .QA(),
-        .QB(dout_i),
-			  .CLKA(wr_clk),
-			  .CLKB(rd_clk),
-			  .CENA(!ram_wr_en_i),
-			  .CENB(!ram_rd_en_i),
-			  .WENA(!ram_wr_en_i),
-			  .WENB(1'b1),
-			  .AA({1'b0, wr_pntr}),
-			  .AB({1'b0, rd_pntr}),
-			  .DA(din),
-			  .DB(6'b0));
+      reg [READ_DATA_WIDTH-1:0] stolen_fifo_mem [0:FIFO_WRITE_DEPTH-1];
+      
+      always @(posedge wr_clk) begin
+          if (ram_wr_en_i)
+            stolen_fifo_mem[wr_pntr] <= din;
+      end
+
+      reg [READ_DATA_WIDTH-1:0] rd_tmp_reg;
+      always @(posedge rd_clk) begin
+          if (ram_rd_en_i)
+            rd_tmp_reg <= stolen_fifo_mem[rd_pntr];
+      end
+
+      assign dout_i = rd_tmp_reg;
   end
-  
-  end
+
   if (WR_PNTR_WIDTH == RD_PNTR_WIDTH) begin
     assign wr_pntr_rd_adj    = wr_pntr_rd[WR_PNTR_WIDTH-1:WR_PNTR_WIDTH-RD_PNTR_WIDTH];
     assign wr_pntr_rd_adj_dc = wr_pntr_rd_dc[WR_PNTR_WIDTH:WR_PNTR_WIDTH-RD_PNTR_WIDTH];
