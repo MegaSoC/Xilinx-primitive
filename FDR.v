@@ -20,12 +20,11 @@
 
 
 module my_FDR(
-    output Q,
+    output reg Q,
     input C,
     input D,
     input R
     );
-reg Q;
 always @(posedge C) begin
 if (R)
     Q <= 0;
@@ -71,9 +70,8 @@ module my_FDRE (
     input CE,
     input D,
     input R,
-    output Q
+    output reg Q
 );
-reg Q;
 always @(posedge C) begin
     if(R) begin
         Q <= 0;
@@ -92,9 +90,8 @@ module my_FDCE (
     input CE,
     input D,
     input CLR,
-    output Q
+    output reg Q
 );
-reg Q;
 always @(posedge C or negedge CLR) begin
     if(CLR) begin
         Q <= 0;
@@ -113,9 +110,8 @@ module my_FDSE (
     input CE,
     input D,
     input S,
-    output Q
+    output reg Q
 );
-reg Q;
 always @(posedge C) begin
     if(S) begin
         Q <= 1;
@@ -144,9 +140,8 @@ module my_FDS (
     input C,
     input D,
     input S,
-    output Q
+    output reg Q
 );
-reg Q;
 always @(posedge C) begin
     if(S) begin
         Q <= 1;
