@@ -285,7 +285,7 @@ module stolen_fifo_base # (
 
       reg [READ_DATA_WIDTH-1:0] rd_tmp_reg;
       always @(posedge rd_clk) begin
-          if (rst)
+          if (rd_rst_i)
             rd_tmp_reg <= {READ_DATA_WIDTH{1'b0}};
           else if (ram_rd_en_i)
             rd_tmp_reg <= stolen_fifo_mem[rd_pntr];
